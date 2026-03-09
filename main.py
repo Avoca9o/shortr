@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Header
 from typing import Optional
 from contextlib import asynccontextmanager
-from database import get_db, init_models, close_db, add_link_db, get_link_db, delete_link_db, update_link_db, increase_link_access_count_db, get_link_by_original_url_db, create_user_db, get_user_by_username_db, get_top_10_links_db
+from database import get_db, init_models, close_db, add_link_db, get_link_db, delete_link_db, delete_link_without_user_db, update_link_db, increase_link_access_count_db, get_link_by_original_url_db, create_user_db, get_user_by_username_db, get_top_10_links_db
 from cache import cache_client
 from generator import generate_short_url
 from datetime import datetime, timedelta
@@ -128,7 +128,7 @@ async def redirect_to_original_url(short_url: str, background_tasks: BackgroundT
 
     if link.expires_at and link.expires_at < datetime.now():
         try:
-            await delete_link_db(db, short_url)
+            await delete_link_without_user_db(db, short_url)
             await cache_client.delete(short_url)
         except Exception as e:
             print(f"Error deleting link from database and cache: {e}")

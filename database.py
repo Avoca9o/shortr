@@ -40,6 +40,10 @@ async def get_link_db(db:AsyncSession, short_url: str):
     result = await db.execute(select(Link).where(Link.short_url == short_url))
     return result.scalar_one_or_none()
 
+async def delete_link_without_user_db(db:AsyncSession, short_url: str):
+    await db.execute(delete(Link).where(Link.short_url == short_url, Link.user_id == None))
+    await db.commit()
+
 async def delete_link_db(db:AsyncSession, current_user: int, short_url: str):
     await db.execute(delete(Link).where(Link.short_url == short_url, Link.user_id == current_user))
     await db.commit()
